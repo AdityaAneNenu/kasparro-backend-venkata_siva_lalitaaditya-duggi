@@ -1,0 +1,11 @@
+id,title,description,category,author,tags,url,date,value
+1,Introduction to Python,A comprehensive guide to Python programming,Technology,John Smith,"python,programming,tutorial",https://example.com/python-intro,2024-01-15,100
+2,Machine Learning Basics,Understanding the fundamentals of ML,Data Science,Jane Doe,"ml,ai,data",https://example.com/ml-basics,2024-01-16,150
+3,Web Development with FastAPI,Building modern APIs with FastAPI,Technology,Bob Wilson,"python,fastapi,api",https://example.com/fastapi-guide,2024-01-17,200
+4,Data Engineering Pipelines,Best practices for ETL systems,Data Science,Alice Johnson,"etl,data,engineering",https://example.com/data-eng,2024-01-18,175
+5,Cloud Computing Essentials,AWS and GCP fundamentals,Cloud,Charlie Brown,"aws,gcp,cloud",https://example.com/cloud-essentials,2024-01-19,125
+6,Docker for Developers,Containerization made easy,DevOps,Diana Prince,"docker,containers,devops",https://example.com/docker-guide,2024-01-20,180
+7,PostgreSQL Performance,Optimizing database queries,Database,Edward Norton,"postgres,sql,database",https://example.com/pg-perf,2024-01-21,160
+8,API Design Best Practices,Creating RESTful APIs that scale,Technology,Fiona Green,"api,rest,design",https://example.com/api-design,2024-01-22,140
+9,Testing Strategies,Unit and integration testing guide,Quality,George Harris,"testing,quality,ci",https://example.com/testing-guide,2024-01-23,130
+10,Microservices Architecture,Building distributed systems,Architecture,Hannah White,"microservices,architecture,distributed",https://example.com/microservices,2024-01-24,190

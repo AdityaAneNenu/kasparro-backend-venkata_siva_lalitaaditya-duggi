@@ -1,0 +1,39 @@
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = ["core", "api", "ingestion", "services", "schemas"]
+skip = [".venv", "venv"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = false
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["venv", ".venv", "tests", "Kaspero"]
+no_implicit_optional = false
+disable_error_code = ["assignment", "arg-type", "return-value", "attr-defined", "index", "var-annotated", "misc", "valid-type", "method-assign", "no-any-return"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"

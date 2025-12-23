@@ -1,0 +1,25 @@
+[flake8]
+max-line-length = 100
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    .eggs,
+    *.egg,
+    build,
+    dist,
+    Kaspero
+# E203: whitespace before ':' (conflicts with Black)
+# E501: line too long (handled by Black)
+# W503: line break before binary operator (conflicts with Black)
+# E402: module level import not at top of file (needed for sys.path manipulation)
+# E712: comparison to True/False (sometimes needed for explicit checks)
+# F401: imported but unused (many false positives with __init__.py)
+# F541: f-string is missing placeholders (sometimes intentional)
+# F811: redefinition of unused name (sometimes needed)
+# F841: local variable assigned but never used (sometimes needed for context)
+ignore = E203, E501, W503, E402, E712, F401, F541, F811, F841
+per-file-ignores =
+    __init__.py:F401
+    tests/*:F401,F811,F841

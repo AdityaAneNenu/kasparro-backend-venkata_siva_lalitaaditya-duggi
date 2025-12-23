@@ -1,0 +1,40 @@
+# Kaspero ETL Scheduler
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
+# Install cron and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cron \
+    curl \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create data directory
+RUN mkdir -p /app/data
+
+# Setup cron job script
+COPY scripts/cron_etl.sh /app/scripts/cron_etl.sh
+RUN chmod +x /app/scripts/cron_etl.sh
+
+# Create cron job (runs every 5 minutes by default)
+RUN echo "*/5 * * * * root cd /app && /usr/local/bin/python -m scripts.run_etl >> /var/log/cron.log 2>&1" > /etc/cron.d/etl-cron && \
+    chmod 0644 /etc/cron.d/etl-cron && \
+    crontab /etc/cron.d/etl-cron && \
+    touch /var/log/cron.log
+
+# Run cron in foreground
+CMD ["cron", "-f"]

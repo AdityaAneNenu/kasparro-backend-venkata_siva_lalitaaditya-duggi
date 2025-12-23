@@ -1,0 +1,110 @@
+# Kaspero ETL System - Docker Compose Configuration
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: kaspero-db
+    environment:
+      POSTGRES_USER: kaspero
+      POSTGRES_PASSWORD: kaspero
+      POSTGRES_DB: kaspero
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kaspero -d kaspero"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kaspero-network
+
+  # API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaspero-api
+    environment:
+      DATABASE_URL: postgresql://kaspero:kaspero@db:5432/kaspero
+      API_KEY: ${API_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: json
+      CSV_SOURCE_PATH: /app/data/source.csv
+      CSV_SOURCE_2_PATH: /app/data/source2.csv
+      API_SOURCE_URL: ${API_SOURCE_URL:-https://api.example.com/data}
+      RSS_SOURCE_URL: ${RSS_SOURCE_URL:-https://feeds.example.com/rss}
+    volumes:
+      - ./data:/app/data:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kaspero-network
+    restart: unless-stopped
+
+  # ETL Worker (runs scheduled ETL jobs)
+  etl-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaspero-etl
+    command: ["python", "-m", "scripts.run_etl"]
+    environment:
+      DATABASE_URL: postgresql://kaspero:kaspero@db:5432/kaspero
+      API_KEY: ${API_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: json
+      CSV_SOURCE_PATH: /app/data/source.csv
+      CSV_SOURCE_2_PATH: /app/data/source2.csv
+      API_SOURCE_URL: ${API_SOURCE_URL:-https://api.example.com/data}
+      RSS_SOURCE_URL: ${RSS_SOURCE_URL:-https://feeds.example.com/rss}
+      ETL_SCHEDULE_MINUTES: ${ETL_SCHEDULE_MINUTES:-5}
+    volumes:
+      - ./data:/app/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - kaspero-network
+    restart: unless-stopped
+
+  # ETL Scheduler (cron-based scheduling)
+  etl-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.scheduler
+    container_name: kaspero-scheduler
+    environment:
+      DATABASE_URL: postgresql://kaspero:kaspero@db:5432/kaspero
+      API_KEY: ${API_KEY:-}
+      ETL_CRON_SCHEDULE: ${ETL_CRON_SCHEDULE:-*/5 * * * *}
+    volumes:
+      - ./data:/app/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - kaspero-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  kaspero-network:
+    driver: bridge

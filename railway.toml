@@ -1,0 +1,7 @@
+# Railway Cron Job Configuration
+# This file defines the scheduled ETL job
+
+[cron]
+# Run ETL every 5 minutes
+schedule = "*/5 * * * *"
+command = "python -m scripts.run_etl --once"

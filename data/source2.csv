@@ -1,0 +1,9 @@
+product_id;name;description;price;in_stock;created_date;category_code
+P001;Widget Pro;  High-quality widget for professionals  ;49.99;true;2024-01-10;TECH
+P002;Super Gadget;"Gadget with ""amazing"" features";129.50;yes;2024-01-11;ELECT
+P003;Basic Tool;N/A;19.99;1;2024-01-12;TOOLS
+P004;Premium Service;;299.00;false;2024-01-13;SERV
+P005;Economy Pack;Budget-friendly option;9.99;true;2024-01-14;MISC
+P006;Deluxe Bundle;Everything you need;499.99;yes;2024-01-15;TECH
+P007;Starter Kit;Perfect for beginners;24.99;1;2024-01-16;TOOLS
+P008;Enterprise Solution;For large organizations;999.00;true;2024-01-17;SERV
