@@ -433,7 +433,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -443,182 +443,184 @@ jobs:
             VCS_REF=${{ github.sha }}
 
   # ============== Container Security Scan ==============
-  scan-container:
-    name: Container Security Scan
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name != 'pull_request'
+  # Disabled until GHCR package permissions are configured
+  # scan-container:
+  #   name: Container Security Scan
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   if: github.event_name != 'pull_request'
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Log in to Container Registry
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ${{ env.REGISTRY }}
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Get lowercase owner
-        id: string
-        run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+  #     - name: Get lowercase owner
+  #       id: string
+  #       run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
       
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'ghcr.io/${{ steps.string.outputs.owner }}/${{ env.IMAGE_NAME }}:latest'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-        continue-on-error: true
+  #     - name: Run Trivy vulnerability scanner
+  #       uses: aquasecurity/trivy-action@master
+  #       with:
+  #         image-ref: 'ghcr.io/${{ steps.string.outputs.owner }}/${{ env.IMAGE_NAME }}:latest'
+  #         format: 'sarif'
+  #         output: 'trivy-results.sarif'
+  #         severity: 'CRITICAL,HIGH'
+  #       continue-on-error: true
       
-      - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v4
-        if: success() && hashFiles('trivy-results.sarif') != ''
-        with:
-          sarif_file: 'trivy-results.sarif'
-        continue-on-error: true
+  #     - name: Upload Trivy scan results
+  #       uses: github/codeql-action/upload-sarif@v4
+  #       if: success() && hashFiles('trivy-results.sarif') != ''
+  #       with:
+  #         sarif_file: 'trivy-results.sarif'
+  #       continue-on-error: true
 
   # ============== E2E Tests ==============
-  test-e2e:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name != 'pull_request'
+  # Disabled until GHCR package permissions are configured
+  # test-e2e:
+  #   name: E2E Tests
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   if: github.event_name != 'pull_request'
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
       
-      - name: Start services
-        run: |
-          docker compose up -d
-          sleep 15
+  #     - name: Start services
+  #       run: |
+  #         docker compose up -d
+  #         sleep 15
       
-      - name: Wait for services
-        run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:8000/health; then
-              echo "API is ready"
-              break
-            fi
-            echo "Waiting for API..."
-            sleep 2
-          done
+  #     - name: Wait for services
+  #       run: |
+  #         for i in {1..30}; do
+  #           if curl -f http://localhost:8000/health; then
+  #             echo "API is ready"
+  #             break
+  #           fi
+  #           echo "Waiting for API..."
+  #           sleep 2
+  #         done
       
-      - name: Run E2E tests
-        run: |
-          # Health check
-          curl -f http://localhost:8000/health | jq .
+  #     - name: Run E2E tests
+  #       run: |
+  #         # Health check
+  #         curl -f http://localhost:8000/health | jq .
           
-          # Data endpoint
-          curl -f http://localhost:8000/data | jq .
+  #         # Data endpoint
+  #         curl -f http://localhost:8000/data | jq .
           
-          # Stats endpoint
-          curl -f http://localhost:8000/stats | jq .
+  #         # Stats endpoint
+  #         curl -f http://localhost:8000/stats | jq .
           
-          # Metrics endpoint
-          curl -f http://localhost:8000/metrics
+  #         # Metrics endpoint
+  #         curl -f http://localhost:8000/metrics
           
-          # Ready endpoint
-          curl -f http://localhost:8000/ready | jq .
-          
-          # Live endpoint
-          curl -f http://localhost:8000/live | jq .
+  #         # Ready endpoint
+  #         curl -f http://localhost:8000/ready | jq .
           
           echo "All E2E tests passed!"
       
-      - name: Collect logs
-        if: failure()
-        run: docker compose logs
+  #     - name: Collect logs
+  #       if: failure()
+  #       run: docker compose logs
       
-      - name: Cleanup
-        if: always()
-        run: docker compose down -v
+  #     - name: Cleanup
+  #       if: always()
+  #       run: docker compose down -v
 
   # ============== Deploy to Staging ==============
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build, test-e2e]
-    if: github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-      url: https://staging.kaspero.example.com
+  # Disabled until GHCR is configured
+  # deploy-staging:
+  #   name: Deploy to Staging
+  #   runs-on: ubuntu-latest
+  #   needs: [build, test-e2e]
+  #   if: github.ref == 'refs/heads/develop'
+  #   environment:
+  #     name: staging
+  #     url: https://staging.kaspero.example.com
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
       
-      - name: Deploy to staging
-        run: |
-          echo "Deploying to staging environment..."
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          # Add your staging deployment commands here
-          # Examples:
-          # - kubectl set image deployment/kaspero-api ...
-          # - aws ecs update-service ...
-          # - railway up ...
+  #     - name: Deploy to staging
+  #       run: |
+  #         echo "Deploying to staging environment..."
+  #         echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+  #         # Add your staging deployment commands here
+  #         # Examples:
+  #         # - kubectl set image deployment/kaspero-api ...
+  #         # - aws ecs update-service ...
+  #         # - railway up ...
       
-      - name: Verify deployment
-        run: |
-          echo "Verifying staging deployment..."
-          # curl -f https://staging.kaspero.example.com/health
+  #     - name: Verify deployment
+  #       run: |
+  #         echo "Verifying staging deployment..."
+  #         # curl -f https://staging.kaspero.example.com/health
 
   # ============== Deploy to Production ==============
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [build, test-e2e, test-stress, test-performance]
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: production
-      url: https://kaspero.example.com
+  # Disabled until GHCR is configured
+  # deploy-production:
+  #   name: Deploy to Production
+  #   runs-on: ubuntu-latest
+  #   needs: [build, test-e2e, test-stress, test-performance]
+  #   if: github.ref == 'refs/heads/main'
+  #   environment:
+  #     name: production
+  #     url: https://kaspero.example.com
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
       
-      - name: Deploy to production
-        run: |
-          echo "Deploying to production environment..."
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          # Add your production deployment commands here
+  #     - name: Deploy to production
+  #       run: |
+  #         echo "Deploying to production environment..."
+  #         echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+  #         # Add your production deployment commands here
       
-      - name: Verify deployment
-        run: |
-          echo "Verifying production deployment..."
-          # curl -f https://kaspero.example.com/health
+  #     - name: Verify deployment
+  #       run: |
+  #         echo "Verifying production deployment..."
+  #         # curl -f https://kaspero.example.com/health
       
-      - name: Notify on success
-        if: success()
-        run: |
-          echo "Production deployment successful!"
-          # Add notification (Slack, Discord, email, etc.)
+  #     - name: Notify on success
+  #       if: success()
+  #       run: |
+  #         echo "Production deployment successful!"
+  #         # Add notification (Slack, Discord, email, etc.)
       
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "Production deployment failed!"
-          # Add notification and potentially rollback
+  #     - name: Notify on failure
+  #       if: failure()
+  #       run: |
+  #         echo "Production deployment failed!"
+  #         # Add notification and potentially rollback
 
   # ============== Cleanup ==============
-  cleanup:
-    name: Cleanup Old Images
-    runs-on: ubuntu-latest
-    needs: [deploy-production]
-    if: github.ref == 'refs/heads/main'
+  # Disabled until GHCR is configured
+  # cleanup:
+  #   name: Cleanup Old Images
+  #   runs-on: ubuntu-latest
+  #   needs: [deploy-production]
+  #   if: github.ref == 'refs/heads/main'
     
-    permissions:
-      packages: write
+  #   permissions:
+  #     packages: write
     
-    steps:
-      - name: Delete old container images
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: ${{ github.event.repository.name }}
-          package-type: 'container'
-          min-versions-to-keep: 10
-          delete-only-untagged-versions: 'true'
-        continue-on-error: true
+  #   steps:
+  #     - name: Delete old container images
+  #       uses: actions/delete-package-versions@v5
+  #       with:
+  #         package-name: ${{ github.event.repository.name }}
+  #         package-type: 'container'
+  #         min-versions-to-keep: 10
+  #         delete-only-untagged-versions: 'true'
+  #       continue-on-error: true
