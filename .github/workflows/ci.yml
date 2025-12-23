@@ -450,9 +450,9 @@ jobs:
   #   needs: build
   #   if: github.event_name != 'pull_request'
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
       
   #     - name: Log in to Container Registry
   #       uses: docker/login-action@v3
@@ -526,7 +526,7 @@ jobs:
   #         # Ready endpoint
   #         curl -f http://localhost:8000/ready | jq .
           
-          echo "All E2E tests passed!"
+  #         echo "All E2E tests passed!"
       
   #     - name: Collect logs
   #       if: failure()
